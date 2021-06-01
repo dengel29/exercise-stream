@@ -1,26 +1,34 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <ExerciseList/>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ExerciseList from './components/ExerciseList.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    ExerciseList
   }
 }
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Share Tech Mono', monospace, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  font-size: 1.2em;
+}
+
+input {
+    font-size: 1em;
+  }
+button {
+  font-family: 'Share Tech Mono', monospace, Avenir, Helvetica, Arial, sans-serif;
 }
 </style>
