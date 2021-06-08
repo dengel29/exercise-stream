@@ -1,19 +1,23 @@
 <template>
 
-  <button @click="send('PAUSE')">
-    {{ timeLeft }}
+  <p>{{ timeLeft }}</p>
+  <button @click="toggleTimer">
+    {{paused || idle ? 'Resume' : 'Pause'}}
   </button>
-  <button @click="send('RESUME')">Resume</button>
-  <button @click="returnState">print state</button>
 </template>
 
 <script>
 import {useMachine} from '@xstate/vue'
 import timerMachine from '../machines/timer'
 export default {
-  props: ['duration'],
+  props: ['duration', 'startImmediately'],
   setup(props) {
-    const {state, send} = useMachine(timerMachine, {context: {duration: props.duration, breakDuration: props.breakDuration}})
+    const {state, send} = useMachine(timerMachine, {
+      context: {
+        duration: props.duration,
+        startImmediately: props.startImmediately
+      }
+    })
     return {
       state,
       send
@@ -27,10 +31,29 @@ export default {
     complete() {
       return this.state.context.elapsed >= this.state.context.duration
     },
+    paused() {
+      return this.state.matches("paused")
+    },
+    idle() {
+      return this.state.matches("idle")
+    },
+    running() {
+      return this.state.matches("running")
+    }
   },
   methods: {
     returnState: function() {
       console.log(this.state.matches("paused"))
+    },
+    toggleTimer: function() {
+      if (this.paused || this.idle) {
+        this.send('RESUME')
+        return
+      }
+      if (this.state.matches("running")) {
+        this.send('PAUSE')
+        return
+      }
     }
   },
   watch: {
@@ -45,5 +68,7 @@ export default {
 </script>
 
 <style scoped>
-
+  p {
+    margin :0
+  }
 </style>

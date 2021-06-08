@@ -1,5 +1,5 @@
 <template>
-  <ExerciseList/>
+ <ExerciseList/>
 </template>
 
 <script>

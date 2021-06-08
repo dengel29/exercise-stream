@@ -1,17 +1,18 @@
 <template>
 <nav>
-  <button @click="toggleWorkout">start workout</button>
+  <button @click="toggleWorkout">start workout</button><button @click="resetSetAndWorkouts">reset</button>
 </nav>
 <!-- Working Out View -->
 <div v-if="!editing">
   <div class="workout-grid">
     <div class="progress-area">
-      <div class="set-indicator" :style="setIndicatorStyles">
-         <div class="set" style="background: green" v-for="index in setsComplete" :key="index">
+           <div class="set-indicator" :style="setIndicatorStyles" v-if="setsComplete === -1">
+            <div class="set" v-for="index in setAmount" :key="index"></div>
+          </div>
+        <div class="set-indicator" :style="setIndicatorStyles" v-else>
+          <div class="set" style="background: green" v-for="index in setsComplete" :key="index"></div>
+          <div class="set" v-for="index in setsLeft" :key="index"></div>
         </div>
-        <div class="set" v-for="index in setsLeft" :key="index">
-        </div>
-      </div>
       <div class="workouts">
         <h2>Workout Progress!</h2>
         <div 
@@ -25,13 +26,14 @@
     <div v-if="!currentWorkout">
       WORKOUT COMPLETE
     </div>
-    <div v-if="currentWorkout" class="current-workout">
+    <div v-if="currentWorkout" class="current-workout" @keyup.esc="pause">
       <p> 
         {{currentWorkout.name}}
       </p>
       <Timer :key="updater"
         @exerciseComplete="exerciseComplete"
         :duration=currentWorkout.duration
+        :start-immediately=shouldStartImmediately
         >
       </Timer>
       <div v-if="currentWorkout.complete">Onto the next one</div>
@@ -39,7 +41,7 @@
   </div>
 </div>
 <!-- Set and Exercise Input View -->
-<div v-if="editing">
+<div v-if="editing" class="editing-view">
   <div class="grid">
     <div class="exercise-inputs">
       <label for="">
@@ -66,7 +68,7 @@
           </label>
           <label for="">
             Duration of break between sets
-            <input :disabled="!auto" type="number">
+            <input :disabled="!auto" type="number" v-model.number="restDuration">
           </label>
         </div>
         
@@ -76,6 +78,10 @@
       <!-- if it is auto or manual -->
         <!-- if it is auto how much break between workouts -->
       <!--  -->
+      <div class="set-indicator" :style="setIndicatorStyles">
+        <div class="set neutral" v-for="index in setAmount" :key="index">
+        </div>
+      </div>
       <ol>
           <li 
             v-for="(exercise, index) in exercises" 
@@ -109,7 +115,7 @@ export default {
       ],
       editing: true,
       setAmount: 1,
-      setsComplete: 0,
+      setsComplete: -1,
       auto: false,
       updater: 0,
       restDuration: 3,
@@ -121,32 +127,46 @@ export default {
       // rests are exercises also, so checks if just completed 'resting' workout or normal workout
       if (!this.resting) {
         this.currentWorkout.complete = true
-        this.setCheck()
         this.status = 'resting'
+        this.setCheck()
       } else {
         this.status = 'workingOut'
       }
     },
     setCheck: function() {
       // end the set if all workouts are complete
-      if (this.exercises.filter(exercise => !exercise.complete).length === 0) {
+     if (this.exercises.every(exercise => exercise.complete)) {
         this.endSet()
       }
     },
     endSet() {
-      this.setsComplete++
-      // if 
-      if (this.setsLeft === 0 ) {
-        return
-      } else {
-        this.resetWorkouts()
+      // first set
+      console.log("ending set")
+      // this errors when there's ONLY ONE SET but is fine if there is more than one SET
+      if (this.setsComplete === -1) {
+        console.log('setscomplete is -1')
+        this.setsComplete = 1
+      // every set after first
+      } 
+      else {
+        this.setsComplete++
+        // last set
+        if (this.setsLeft === 0 ) {
+          return
+        // any set besides last
+        } 
       }
+      this.resetWorkouts()
     },
     resetWorkouts() {
       this.exercises.forEach(ex => {
         ex.complete = false
         ex.timeLeft = ex.duration
       })
+    },
+    resetSetAndWorkouts() {
+      this.setsComplete = 0
+      this.resetWorkouts()
     },
     toggleWorkout: function() {
       this.editing = !this.editing
@@ -190,13 +210,23 @@ export default {
         '--grid-width': `repeat(${this.setAmount}, minmax(0, 1fr))`,
       }
     },
+    shouldStartImmediately() {
+      return this.anyExercisesComplete || this.setsComplete >= 0
+    },
     currentWorkout() {
       // returns a 'resting' view with rest duration if resting, or the next incomplete workout in the set
-      if (this.resting) {
-        return {name: "Restin", duration: this.restDuration, complete: false}
-      } else {
+      if (this.resting && this.exercises.every(e => e.complete)) {
+        return {name: "Big Restin", duration: 5, complete: false}
+      } else if (this.resting) {
+        let restDuration = this.restDuration  
+        return {name: "Restin", duration: restDuration, complete: false}
+      }
+      else {
         return this.exercises.filter(e => !e.complete)[0]
       }
+    },
+    anyExercisesComplete() {
+      return this.exercises.some(ex => ex.complete)
     },
     setsLeft() {
       return this.setAmount - this.setsComplete
@@ -249,6 +279,10 @@ export default {
     margin-top: 1em;
   }
 
+  .editing-view {
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+  }
+
   li {
     display: flex;
     width: 50%;
@@ -284,13 +318,22 @@ export default {
     color: white;
     display: flex;
     flex-direction:column;
-    font-size:12em
+    font-size:10em;
+    text-align: right
   }
 
   .current-workout p {
     margin: 0
   }
 
+.exercise-list {
+  margin: 0 auto
+}
+
+ol {
+    padding: 0;
+    list-style-type: none;
+}
 nav {
   margin: 3em
 }
@@ -303,5 +346,9 @@ nav {
 
 .set {
   border:1px solid red;
+}
+
+.neutral {
+  border: 1px solid black;
 }
 </style>

@@ -6,13 +6,27 @@ const tick = assign({
 
 const timerMachine = createMachine({
   id: "timer",
-  initial: "running",
+  initial: "idle",
   context: {
     elapsed: 0,
     duration: 10,
     interval: 0.1,
+    startImmediately: false,
   },
   states: {
+    idle: {
+      on: {
+        RESUME: {
+          target: "running",
+        },
+      },
+      always: {
+        target: "running",
+        cond: (context) => {
+          return context.startImmediately;
+        },
+      },
+    },
     running: {
       invoke: {
         src: (context) => (callback) => {
