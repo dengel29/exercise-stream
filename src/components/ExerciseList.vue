@@ -1,4 +1,5 @@
 <template>
+<button @click="generateURLParams">Gen</button>
 <nav>
   <button @click="toggleWorkout">start workout</button><button @click="resetSetAndWorkouts">reset</button>
 </nav>
@@ -123,6 +124,21 @@ export default {
     }
   },
   methods: {
+    generateURLParams: function() {
+      // let exercises = toRaw(this.exercises)
+      // console.log(this.exercises)
+      // setAmount
+      // restDuration
+      // let exerciseString = "exercises="
+      // this.exercises.forEach(e => {
+      //   exerciseString = exerciseString.concat(new URLSearchParams(e).toString()).concat('&')
+      // })
+      // let setAmountString = this.setAmount
+      // console.log(exerciseString)
+      // let params = new URLSearchParams(texerc)
+      // params.append('exercises', ["nea", "tdick"])
+      // console.log(params.getAll('exercises'))
+    },
     exerciseComplete: function() {
       // rests are exercises also, so checks if just completed 'resting' workout or normal workout
       if (!this.resting) {
@@ -165,7 +181,7 @@ export default {
       })
     },
     resetSetAndWorkouts() {
-      this.setsComplete = 0
+      this.setsComplete = -1
       this.resetWorkouts()
     },
     toggleWorkout: function() {
@@ -215,11 +231,10 @@ export default {
     },
     currentWorkout() {
       // returns a 'resting' view with rest duration if resting, or the next incomplete workout in the set
-      if (this.resting && this.exercises.every(e => e.complete)) {
-        return {name: "Big Restin", duration: 5, complete: false}
+      if (this.resting && this.exercises.every(e => !e.complete)) {
+        return {name: "Big Break", duration: 5, complete: false}
       } else if (this.resting) {
-        let restDuration = this.restDuration  
-        return {name: "Restin", duration: restDuration, complete: false}
+        return {name: "Resting", duration: this.restDuration, complete: false}
       }
       else {
         return this.exercises.filter(e => !e.complete)[0]
@@ -230,9 +245,6 @@ export default {
     },
     setsLeft() {
       return this.setAmount - this.setsComplete
-    },
-    toggleView() {
-      return this.viewFocused === "editingWorkout"
     },
     workingOut() {
       return this.status === "workingOut"
