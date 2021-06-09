@@ -63,13 +63,13 @@
           <input type="number" min='1' v-model.number="setAmount">
         </label>
         <div style="border: 0.5px solid; margin-top:0.2em; padding: 0.2em">
-          <label for="" >
-            Auto?
-            <input type="checkbox" v-model="auto">
-          </label>
           <label for="">
+            Duration of break between exercises
+            <input type="number" v-model.number="restDuration">
+          </label>
+           <label for="">
             Duration of break between sets
-            <input :disabled="!auto" type="number" v-model.number="restDuration">
+            <input type="number" v-model.number="bigBreakDuration">
           </label>
         </div>
         
@@ -117,9 +117,9 @@ export default {
       editing: true,
       setAmount: 1,
       setsComplete: -1,
-      auto: false,
       updater: 0,
       restDuration: 3,
+      bigBreakDuration: 10,
       status: 'idle'
     }
   },
@@ -232,7 +232,7 @@ export default {
     currentWorkout() {
       // returns a 'resting' view with rest duration if resting, or the next incomplete workout in the set
       if (this.resting && this.exercises.every(e => !e.complete)) {
-        return {name: "Big Break", duration: 5, complete: false}
+        return {name: "Big Break", duration: this.bigBreakDuration, complete: false}
       } else if (this.resting) {
         return {name: "Resting", duration: this.restDuration, complete: false}
       }
