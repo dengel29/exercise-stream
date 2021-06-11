@@ -10,14 +10,14 @@
   </button>
 </nav>
 <!-- Working Out View -->
-<div v-if="!editing">
+<div v-if="!editing" class="styles">
   <div class="workout-grid" ref="workoutarea" @dragover="dragOver" @drop="drop">
     <div class="progress-area">
            <div class="set-indicator" :style="setIndicatorStyles" v-if="setsComplete === -1">
             <div class="set" v-for="index in setAmount" :key="index"></div>
           </div>
         <div class="set-indicator" :style="setIndicatorStyles" v-else>
-          <div class="set" style="background: rgb(65, 184, 131)" v-for="index in setsComplete" :key="index"></div>
+          <div class="set complete" v-for="index in setsComplete" :key="index"></div>
           <div class="set" v-for="index in setsLeft" :key="index"></div>
         </div>
       <div class="workouts">
@@ -26,30 +26,31 @@
           class="exercise-pill"
           v-for="exercise in exercises" 
           :key="exercise.name"
-          :class="exercise === currentWorkout ? currentExercise: ''" 
-          :style="exercise.complete ? 'background: rgb(65, 184, 131)' : ''">
+          :class="[
+            (exercise === currentExercise ? 'current-exercise': ''), 
+            (exercise.complete ? 'complete' : '')]">
           {{exercise.name}}
         </div>
       </div>
     </div>
-    <div v-if="!currentWorkout">
+    <div v-if="!currentExercise">
       WORKOUT COMPLETE
     </div>
-    <div v-if="currentWorkout" :style="timerPosition" class="current-workout" draggable="true" ref="currentWorkout" @dragstart="dragStart">
+    <div v-if="currentExercise" :style="timerPosition" class="current-workout" :class="dragging ? grabbing : 'grab'" draggable="true" ref="currentExercise" @dragstart="dragStart" @mouseover="addGrabClass" @mouseleave="removeGrabClass">
       <Timer :key="updater"
         @exerciseComplete="exerciseComplete"
-        :duration=currentWorkout.duration
+        :duration=currentExercise.duration
         :start-immediately=shouldStartImmediately
         >
       </Timer>
       <p> 
-        {{currentWorkout.name}}
+        {{currentExercise.name}}
       </p>
     </div>
   </div>
 </div>
 <!-- Set and Exercise Input View -->
-<div v-if="editing" class="editing-view">
+<div v-if="editing" class="editing-view styles">
   <div class="grid">
     <div class="higher-level-controls">
       <!-- how many sets -->
@@ -116,8 +117,9 @@ export default {
   data: function() {
     return {
       exercises: [],
-      currentWorkoutX: 10,
-      currentWorkoutY: 10,
+      dragging: false,
+      currentExerciseX: 10,
+      currentExerciseY: 10,
       editing: true,
       setAmount: 2,
       setsComplete: -1,
@@ -125,7 +127,8 @@ export default {
       restDuration: 3,
       bigBreakDuration: 10,
       status: 'idle',
-      currentExercise: 'current-exercise'
+      grabbing: 'grabbing',
+      channel: null
     }
   },
   mounted: function() {
@@ -134,15 +137,31 @@ export default {
     // url param detection and updating data from URL params
     let url = new URL(document.location)
     if (url.searchParams.has("x") && url.searchParams.has("y")) {
-      this.currentWorkoutX = url.searchParams.get("x")
-      this.currentWorkoutY = url.searchParams.get("y")
+      this.currentExerciseX = url.searchParams.get("x")
+      this.currentExerciseY = url.searchParams.get("y")
     }
     if (url.searchParams.has("exercises")) {
       this.exercises = JSON.parse(decodeURIComponent(url.searchParams.get("exercises")))
     }
+    if (url.searchParams.has("setAmount")) {
+      this.setAmount = Number(url.searchParams.get("setAmount"))
+    }
+    if (url.searchParams.has("restDuration")) {
+      this.restDuration = Number(url.searchParams.get("restDuration"))
+    }
+    if (url.searchParams.has("bigBreakDuration")) {
+      this.bigBreakDuration = Number(url.searchParams.get("bigBreakDuration"))
+    }
   },
   methods: {
+    addGrabClass: function() {
+      this.$refs.currentExercise.classList.add('grab')
+    },
+    removeGrabClass: function() {
+      this.$refs.currentExercise.classList.remove('grab')
+    },
     dragStart: function (event) {
+      this.dragging = true
       var style = window.getComputedStyle(event.target, null);
       event.dataTransfer.setData("text/plain",
       (parseInt(style.getPropertyValue("left"),10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"),10) - event.clientY));
@@ -152,32 +171,35 @@ export default {
       return false; 
     },
     drop: function (event) {
+      this.dragging = false;
       var offset = event.dataTransfer.getData("text/plain").split(',');
-      // var dm = this.$refs.currentWorkout
-      this.currentWorkoutX = (event.clientX + parseInt(offset[0],10)) + 'px';
-      this.currentWorkoutY = (event.clientY + parseInt(offset[1],10)) + 'px';
-      let url = new URL(document.location)
-      url.searchParams.set("x", `${this.currentWorkoutX}`)
-      url.searchParams.set("y", `${this.currentWorkoutY}`)
-      window.history.pushState({}, '', url);
-      
+      // var dm = this.$refs.currentExercise
+      this.currentExerciseX = (event.clientX + parseInt(offset[0],10)) + 'px';
+      this.currentExerciseY = (event.clientY + parseInt(offset[1],10)) + 'px';
+    
+      this.setURLParams("x", this.currentExerciseX)
+      this.setURLParams("y", this.currentExerciseY)
       event.preventDefault();
       return false;
     },
-    generateURLParams: function() {
-      let url = new URL(document.location)
-      url.searchParams.set("exercises", encodeURIComponent(JSON.stringify(this.exercises)))
-      console.log(JSON.parse(decodeURIComponent(url.searchParams.get("exercises"))))
+    setURLParams: function(param, value) {
+      const url = new URL(document.location)
+      if (typeof value === "string" || typeof value === 'number') {
+        url.searchParams.set(param, value)
+      }
+      if (typeof value === "object") {
+        url.searchParams.set(param, encodeURIComponent(JSON.stringify(value)))
+      }
       window.history.pushState({}, '', url);
-      // let setAmountString = this.setAmount
-      // console.log(exerciseString)
-      // params.append('exercises', this.exercises)
-      // console.log(params.getAll('exercises'))
+    },
+    generateURLParams: function() {
+      this.channel.postMessage(JSON.parse(JSON.stringify(this.exercises)));
+      this.setURLParams("exercises", this.exercises)
     },
     exerciseComplete: function() {
       // rests are exercises also, so checks if just completed 'resting' workout or normal workout
       if (!this.resting) {
-        this.currentWorkout.complete = true
+        this.currentExercise.complete = true
         this.status = 'resting'
         this.setCheck()
       } else {
@@ -229,11 +251,11 @@ export default {
       this.$refs.exercisename.value = ''
       this.$refs.exerciseduration.value = ''
       this.$refs.exercisename.focus();
-      this.generateURLParams()
+      this.setURLParams("exercises", this.exercises)
     },
     removeExercise: function(index) {
       this.exercises.splice(index, 1)
-      this.generateURLParams()
+      this.setURLParams("exercises", this.exercises)
     },
     moveup: function(index) {
       if (index > 0){
@@ -243,8 +265,8 @@ export default {
         this.exercises.splice(index, 1, elementAbove)
         // move element one position higher
         this.exercises.splice(index -1 , 1, selectedElement)
-
       }
+      this.setURLParams("exercises", this.exercises)
     },
     movedown: function(index) {
       if (index < this.exercises.length -1){
@@ -255,6 +277,7 @@ export default {
         // move element one position higher
         this.exercises.splice(index + 1 , 1, selectedElement)
       }
+      this.setURLParams("exercises", this.exercises)
     }
   },
   computed: {
@@ -265,14 +288,14 @@ export default {
     },
     timerPosition() {
       return {
-        '--timer-x': `${this.currentWorkoutX}`,
-        '--timer-y': `${this.currentWorkoutY}`
+        '--timer-x': `${this.currentExerciseX}`,
+        '--timer-y': `${this.currentExerciseY}`
       }
     },
     shouldStartImmediately() {
       return this.anyExercisesComplete || this.setsComplete >= 0
     },
-    currentWorkout() {
+    currentExercise() {
       // returns a 'resting' view with rest duration if resting, or the next incomplete workout in the set
       if (this.resting && this.exercises.every(e => !e.complete)) {
         return {name: "Big Break", duration: this.bigBreakDuration, complete: false}
@@ -297,7 +320,22 @@ export default {
     }
   },
   watch: {
-    currentWorkout: {
+    setAmount: {
+      handler(value) {
+        this.setURLParams("setAmount", value)
+      }
+    },
+    restDuration: {
+      handler(value) {
+        this.setURLParams("restDuration", value)
+      }
+    },
+    bigBreakDuration: {
+      handler(value) {
+        this.setURLParams("bigBreakDuration", value)
+      }
+    },
+    currentExercise: {
       handler(value) {
         // when current workout changes, increment this updater to re-render the timer
         console.log(value)
@@ -314,6 +352,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+
+.styles {
+    --workout-green: #41b983;
+    --input-border: 3px solid var(--workout-green);
+  }
   label {
     display:flex;
     flex-direction: column
@@ -341,14 +384,18 @@ export default {
     input:focus {
       border: none;
       outline: none;
-      border-left: 3px solid rgb(65, 184, 131);
-      border-bottom:3px solid rgb(65, 184, 131);
+      border-left: var(--input-border);
+      border-bottom:var(--input-border);
       border-radius: 3px;
     }
     input[type=number] {
       width: 2.2em;
       
     }
+  }
+
+  .complete {
+    background: var(--workout-green)
   }
 
   .exercise-inputs button {
@@ -387,7 +434,13 @@ export default {
     text-align: center
 
   }
-
+  .grab {
+    cursor: grab
+  }
+  .grabbing {
+    cursor: grabbing;
+    border: 1px dotted black
+  }
   .grid {
     display: grid;
     grid-template-columns: 20em 20em 1fr;
@@ -398,6 +451,14 @@ export default {
     width: 20%;
     position: sticky;
     top: 20px;
+    background-color: hsla(245,25%,20%, 0.9);
+    color: white;
+    height:max-content;
+    padding:0.4em;
+    border-radius:3px;
+    .set {
+      border: 1px solid white
+    }
   }
 
   .exercise-pill {
@@ -422,7 +483,8 @@ export default {
   }
 
 .exercise-list {
-  margin: 0 auto
+  margin: 0 auto;
+  width:50%;
 }
 
 ol {
@@ -436,7 +498,7 @@ nav {
 }
 .set-indicator {
   display:grid;
-  grid-template-columns:var(--grid-width);
+  grid-template-columns: var(--grid-width);
   height:10px;
   gap: 3px;
 }
@@ -458,6 +520,6 @@ nav {
 }
 
 .current-exercise {
-  border: 2px solid rgb(65, 184, 131)
+  border: 2px solid var(--workout-green)
 }
 </style>

@@ -143,7 +143,7 @@ export default {
     -moz-transition: 0.1s linear all;
     -webkit-transition: 0.1s linear all;    /* Allows the ring to change color when the color value updates */
     transition: 0.1s linear all;    /* Allows the ring to change color when the color value updates */
-    stroke: rgb(65, 184, 131); // green
+    stroke: hsla(153, 48%, 49%, 0.7); // green
   }  &__svg {
     // Flips the svg and makes the animation to move left-to-right
     -webkit-transform: scaleX(-1);

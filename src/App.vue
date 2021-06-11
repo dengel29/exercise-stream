@@ -13,7 +13,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 #app {
   font-family: 'Share Tech Mono', monospace, Avenir, Helvetica, Arial, sans-serif;
