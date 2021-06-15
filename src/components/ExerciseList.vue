@@ -40,7 +40,7 @@
       <button @click="timerTop"> <img title="Position the timer to the top of the exercise name" :src="timerTopSVG"/> </button>
       <button @click="timerLeft"> <img title="Position the timer to the left of the exercise name" :src="timerLeftSVG"/> </button>
       <button @click="timerRight"> <img title="Position the timer to the right of the exercise name" :src="timerRightSVG"/> </button>
-      <button @click="noText"> <img title="Position the timer to the right of the exercise name" :src="timerNoTextSVG"/> </button>
+      <button @click="noText"> <img title="Display the timer without the exercise name" :src="timerNoTextSVG"/> </button>
     </div>
     <div v-if="!currentExercise">
       WORKOUT COMPLETE
