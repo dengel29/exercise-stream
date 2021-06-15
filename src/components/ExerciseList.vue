@@ -1,18 +1,20 @@
 <template>
-<nav>
+<nav style="margin-right:3em;">
   <button @click="toggleWorkout">
-    start workout</button>
+    {{buttonText}}</button>
   <button @click="resetSetAndWorkouts">
     reset
   </button>
-  <button @click="generateURLParams">
+  <!-- <button @click="generateURLParams">
     Gen
-  </button>
+  </button> -->
+  <br>
 </nav>
 <!-- Working Out View -->
 <div v-if="!editing" class="styles">
   <div class="workout-grid" ref="workoutarea" @dragover="dragOver" @drop="drop">
     <div class="progress-area">
+      <h1 >Current Progress</h1>
            <div class="set-indicator" :style="setIndicatorStyles" v-if="setsComplete === -1">
             <div class="set" v-for="index in setAmount" :key="index"></div>
           </div>
@@ -21,7 +23,6 @@
           <div class="set" v-for="index in setsLeft" :key="index"></div>
         </div>
       <div class="workouts">
-        <h2>Current Progress</h2>
         <div 
           class="exercise-pill"
           v-for="exercise in exercises" 
@@ -33,6 +34,14 @@
         </div>
       </div>
     </div>
+    <div class="timer-ui-control">
+      <h1> Swap timer UI </h1>
+      <button @click="timerBottom"> <img title="Position the timer to the bottom of the exercise name" :src="timerBottomSVG"/> </button>
+      <button @click="timerTop"> <img title="Position the timer to the top of the exercise name" :src="timerTopSVG"/> </button>
+      <button @click="timerLeft"> <img title="Position the timer to the left of the exercise name" :src="timerLeftSVG"/> </button>
+      <button @click="timerRight"> <img title="Position the timer to the right of the exercise name" :src="timerRightSVG"/> </button>
+      <button @click="noText"> <img title="Position the timer to the right of the exercise name" :src="timerNoTextSVG"/> </button>
+    </div>
     <div v-if="!currentExercise">
       WORKOUT COMPLETE
     </div>
@@ -43,7 +52,7 @@
         :start-immediately=shouldStartImmediately
         >
       </Timer>
-      <p> 
+      <p :style="textDisplay"> 
         {{currentExercise.name}}
       </p>
     </div>
@@ -89,28 +98,39 @@
         <div class="set neutral" v-for="index in setAmount" :key="index">
         </div>
       </div>
-      <ol>
-          <li 
-            v-for="(exercise, index) in exercises" 
-            :key="exercise.name" 
-            :data-id="index">
+        <!-- <p v-if="exercises.length === 0"> no good</p> -->
+        <ol>
+          <li v-for="(exercise, index) in exercises" :key="exercise.name" :data-id="index">
             <div class="move-position-buttons">
               <button @click="moveup(index)">&#9650;</button>
               <button @click="movedown(index)">&#9660;</button>
             </div>
-            <p>{{exercise.name}}</p><p>{{exercise.duration}}s</p>
-            <button style="color: black; border: none; margin-left: 1em; cursor: pointer" @click="removeExercise(index)">&#9447;</button>
+            <p>{{exercise.name}}</p>
+            <p>{{exercise.duration}}s</p>
+            <button style="color: black; border: none; margin-left: 1em; cursor: pointer" @click="removeExercise(index)">
+              &#9447;
+            </button>
           </li>
-      </ol>
+        </ol>
+      </div>
     </div>
-  </div>
 </div>
 </template>
 
 <script>
-import Timer from './Timer.vue'
+import Timer from './Timer.vue';
+import timerLeftSVG from "@/assets/timerLeft.svg"
+import timerRightSVG from "@/assets/timerRight.svg"
+import timerBottomSVG from "@/assets/timerBottom.svg"
+import timerTopSVG from "@/assets/timerTop.svg"
+import timerNoTextSVG from "@/assets/timerNoText.svg"
+
 export default {
-  setup() {},
+  setup() {
+    return {
+      timerLeftSVG, timerRightSVG, timerBottomSVG, timerTopSVG, timerNoTextSVG
+    }
+  },
   components: {
     Timer
   },
@@ -120,6 +140,9 @@ export default {
       dragging: false,
       currentExerciseX: 10,
       currentExerciseY: 10,
+      currentWorkoutDisplayDirection: 'column',
+      currentWorkoutDisplayReverse:'',
+      currentWorkoutDisplayText: 'block',
       editing: true,
       setAmount: 2,
       setsComplete: -1,
@@ -133,7 +156,7 @@ export default {
   },
   mounted: function() {
     // browser channel experiment
-
+    
     // url param detection and updating data from URL params
     let url = new URL(document.location)
     if (url.searchParams.has("x") && url.searchParams.has("y")) {
@@ -154,6 +177,37 @@ export default {
     }
   },
   methods: {
+    // toggleDisplayDirection() {
+    //   currentWorkoutDisplayDirection
+    // },
+    noText:function() {
+      console.log('hihi')
+      this.currentWorkoutDisplayText = 'none'
+      console.log(this.currentWorkoutDisplayText)
+    },
+    timerTop: function() {
+        this.currentWorkoutDisplayDirection = 'column' 
+        this.currentWorkoutDisplayReverse = ''
+        this.currentWorkoutDisplayText = 'block'
+    },
+    timerBottom: function() {
+      console.log('hey')
+        this.currentWorkoutDisplayDirection = 'column' 
+        this.currentWorkoutDisplayReverse = '-reverse'
+        this.currentWorkoutDisplayText = 'block'
+    },
+    timerRight: function() {
+      console.log('hey')
+        this.currentWorkoutDisplayDirection = 'row' 
+        this.currentWorkoutDisplayReverse = '-reverse'
+        this.currentWorkoutDisplayText = 'block'
+    },
+    timerLeft: function() {
+      console.log('hey')
+        this.currentWorkoutDisplayDirection = 'row' 
+        this.currentWorkoutDisplayReverse = ''
+        this.currentWorkoutDisplayText = 'block'
+    },
     addGrabClass: function() {
       this.$refs.currentExercise.classList.add('grab')
     },
@@ -286,10 +340,19 @@ export default {
         '--grid-width': `repeat(${this.setAmount}, minmax(0, 1fr))`,
       }
     },
+    buttonText() {
+      return this.editing ? 'Start Workout' : 'Edit Workout'
+    },
     timerPosition() {
       return {
         '--timer-x': `${this.currentExerciseX}`,
-        '--timer-y': `${this.currentExerciseY}`
+        '--timer-y': `${this.currentExerciseY}`,
+        '--direction': `${this.currentWorkoutDisplayDirection}${this.currentWorkoutDisplayReverse}`,
+      }
+    },
+    textDisplay() {
+      return {
+        '--display' : `${this.currentWorkoutDisplayText}`
       }
     },
     shouldStartImmediately() {
@@ -320,6 +383,27 @@ export default {
     }
   },
   watch: {
+    toggleWorkoutDisplayReverse: {
+      handler(value) {
+        console.log(value)
+        // this.setURLParams("setAmount", value)
+        if(value) {
+          this.currentWorkoutDisplayReverse = '-reverse'
+        }  else {
+          this.currentWorkoutDisplayReverse = ''
+        }
+      }
+    },
+    toggleWorkoutDisplayDirection: {
+      handler(value) {
+        if (value) {
+          this.currentWorkoutDisplayDirection = "row"
+        } else {
+          this.currentWorkoutDisplayDirection = "column"
+        }
+        // this.setURLParams("setAmount", value)
+      }
+    },
     setAmount: {
       handler(value) {
         this.setURLParams("setAmount", value)
@@ -352,7 +436,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
+@mixin smallh1 {
+   margin: 0px 0px 0.4em 0px;
+  font-size:1em;
+}
 .styles {
     --workout-green: #41b983;
     --input-border: 3px solid var(--workout-green);
@@ -411,7 +498,40 @@ export default {
     display: grid;
     position:relative;
     grid-template-columns: 1fr 1fr;
-    height: 80vh
+    height: 80vh;
+    width: 99vw;
+    .timer-ui-control {
+      h1{ 
+        @include smallh1;
+        color: white;
+      };
+      display: flex; 
+      background-color: hsla(245,25%,25%, 0.9);
+      flex-wrap: wrap;
+      justify-content: space-around;
+      flex-direction: row; 
+      width: 4em; 
+      position: absolute; 
+      right: 0;
+      
+      align-items: center;
+      border:3px solid hsla(245,25%,20%, 1);
+      border-radius:3px;
+      button {
+        display:flex;
+        justify-content:center;
+        border: none;
+        background-color:hsla(245,25%,10%, 1);
+        margin:0.2em;
+        border: 1px solid rgba(0, 0, 0, 0.4);;
+        border-radius:3px;
+        width: 28px;
+        height: 28px;
+        &:hover {
+          cursor: pointer
+        }
+      }
+    }
   }
   li {
     display: flex;
@@ -439,7 +559,8 @@ export default {
   }
   .grabbing {
     cursor: grabbing;
-    border: 1px dotted black
+    border: 1px dotted black;
+    background: rgba(0, 0, 0, 0.1)
   }
   .grid {
     display: grid;
@@ -448,22 +569,29 @@ export default {
   }
 
   .progress-area {
-    width: 20%;
+    width: 30%;
+    border: 3px solid hsla(245,25%,20%, 1);
     position: sticky;
     top: 20px;
-    background-color: hsla(245,25%,20%, 0.9);
+    background-color: hsla(245,25%,25%, 0.9);
     color: white;
     height:max-content;
     padding:0.4em;
     border-radius:3px;
+    height: 100%;
     .set {
-      border: 1px solid white
+      border: 1px solid white;
+      box-shadow: 1px 1px;
+    }
+    h1 {
+      @include smallh1
     }
   }
 
   .exercise-pill {
     margin: 0px 0px .2em;
     border-radius: 3px;
+    font-size:1.6em;
   }
   .current-workout {
     align-items: center;
@@ -473,13 +601,14 @@ export default {
     text-shadow: -4px -4px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
     color: white;
     display: flex;
-    flex-direction:column;
+    flex-direction:var(--direction);
     font-size:6em;
   }
 
   .current-workout p {
     margin: 0;
-    width: 4em
+    width: 4em;
+    display: var(--display)
   }
 
 .exercise-list {
@@ -491,21 +620,33 @@ ol {
     padding: 0;
     list-style-type: none;
 }
+ol:empty::before {
+  content: 'Added exercises will appear here';
+  font-style: oblique
+}
 nav {
-  position:absolute;
-  top:0;
-  right:0
+  display:flex;
+  width:100%;
+  height:max-content;
+  background-color: hsla(245,25%,25%, 0.9);
+  margin-top:0;
+  padding:0.2em;
+  margin-bottom:0.2em;
+  align-items:center;
+  justify-content:flex-end
 }
 .set-indicator {
   display:grid;
   grid-template-columns: var(--grid-width);
   height:10px;
   gap: 3px;
+  margin-bottom:1em;
 }
 
 .set {
   border:1px solid black;
-  border-radius:10px
+  border-radius:10px;
+  box-shadow: 1px 1px;
 }
 .move-position-buttons {
   margin-right:0.2em;
