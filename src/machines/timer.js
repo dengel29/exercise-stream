@@ -1,12 +1,12 @@
-import { createMachine, assign } from "xstate";
+import { createMachine, assign } from 'xstate'
 
 const tick = assign({
   elapsed: (context) => +(context.elapsed + context.interval),
-});
+})
 
 const timerMachine = createMachine({
-  id: "timer",
-  initial: "idle",
+  id: 'timer',
+  initial: 'idle',
   context: {
     elapsed: 0,
     duration: 10,
@@ -17,13 +17,13 @@ const timerMachine = createMachine({
     idle: {
       on: {
         RESUME: {
-          target: "running",
+          target: 'running',
         },
       },
       always: {
-        target: "running",
+        target: 'running',
         cond: (context) => {
-          return context.startImmediately;
+          return context.startImmediately
         },
       },
     },
@@ -31,12 +31,12 @@ const timerMachine = createMachine({
       invoke: {
         src: (context) => (callback) => {
           const interval = setInterval(() => {
-            callback("TICK");
-          }, 1000 * context.interval);
+            callback('TICK')
+          }, 1000 * context.interval)
 
           return () => {
-            clearInterval(interval);
-          };
+            clearInterval(interval)
+          }
         },
       },
       on: {
@@ -44,26 +44,26 @@ const timerMachine = createMachine({
           actions: tick,
         },
         PAUSE: {
-          target: "paused",
+          target: 'paused',
         },
       },
       always: {
-        target: "paused",
+        target: 'paused',
         cond: (context) => {
-          return context.elapsed > context.duration;
+          return context.elapsed > context.duration
         },
       },
     },
     paused: {
       on: {
         RESUME: {
-          target: "running",
+          target: 'running',
         },
       },
     },
   },
   on: {
-    "DURATION.UPDATE": {
+    'DURATION.UPDATE': {
       actions: assign({
         duration: (_, event) => event.value,
       }),
@@ -74,6 +74,6 @@ const timerMachine = createMachine({
       }),
     },
   },
-});
+})
 
-export default timerMachine;
+export default timerMachine

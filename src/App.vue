@@ -1,5 +1,5 @@
 <template>
- <ExerciseList/>
+  <ExerciseList />
 </template>
 
 <script>
@@ -8,8 +8,8 @@ import ExerciseList from './components/ExerciseList.vue'
 export default {
   name: 'App',
   components: {
-    ExerciseList
-  }
+    ExerciseList,
+  },
 }
 </script>
 
@@ -17,7 +17,7 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 body {
-  margin: 0
+  margin: 0;
 }
 #app {
   font-family: 'Share Tech Mono', monospace, Avenir, Helvetica, Arial, sans-serif;
@@ -29,8 +29,8 @@ body {
 }
 
 input {
-    font-size: 1em;
-  }
+  font-size: 1em;
+}
 button {
   font-family: 'Share Tech Mono', monospace, Avenir, Helvetica, Arial, sans-serif;
 }

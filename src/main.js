@@ -1,7 +1,7 @@
-import { createApp } from "vue";
-import App from "./App.vue";
+import { createApp } from 'vue'
+import App from './App.vue'
 // import VueLoader from "vue-loader";
-let app = createApp(App);
+let app = createApp(App)
 
 // app.use(VueLoader);
-app.mount("#app");
+app.mount('#app')
