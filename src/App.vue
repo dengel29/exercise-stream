@@ -1,5 +1,8 @@
 <template>
-  <ExerciseList />
+  <div>
+    <ExerciseList />
+    <p class="version">v{{ version }}</p>
+  </div>
 </template>
 
 <script>
@@ -10,10 +13,16 @@ export default {
   components: {
     ExerciseList,
   },
+  data() {
+    return {
+      version: import.meta.env.VITE_APP_VERSION,
+    }
+  },
 }
 </script>
 
-<style lang="scss">
+<style>
+@import 'open-props/style';
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 body {
@@ -26,6 +35,14 @@ body {
   text-align: center;
   color: #2c3e50;
   font-size: 1.2em;
+}
+
+.version {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 0.8em;
+  color: #aaa;
 }
 
 input {

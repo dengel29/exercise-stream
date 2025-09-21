@@ -98,46 +98,40 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .base-timer {
   position: relative;
   width: 300px;
-  height: 300px; /* Removes SVG styling that would hide the time label */
-  &__circle {
-    fill: none;
-    stroke: none;
-  } /* The SVG path that displays the timer's progress */
-  &__path-elapsed {
-    stroke-width: 7px;
-  }
-  &__label {
-    position: absolute;
-    width: inherit;
-    height: inherit;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* Sort of an arbitrary number; adjust to your liking */
-    font-size: 48px;
-  }
-  &__path-remaining {
-    /* Just as thick as the original ring */
-    stroke-width: 9px; /* Rounds the line endings to create a seamless circle */
-    stroke-linecap: round; /* Makes sure the animation starts at the top of the circle */
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg);
-    transform-origin: center; /* One second aligns with the speed of the countdown timer */
-    -moz-transition: 0.1s linear all;
-    -webkit-transition: 0.1s linear all; /* Allows the ring to change color when the color value updates */
-    transition: 0.1s linear all; /* Allows the ring to change color when the color value updates */
-    stroke: hsla(153, 48%, 49%, 0.7); // green
-  }
-  &__svg {
-    // Flips the svg and makes the animation to move left-to-right
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
-  }
+  height: 300px;
+}
+.base-timer__circle {
+  fill: none;
+  stroke: none;
+}
+.base-timer__path-elapsed {
+  stroke-width: 7px;
+}
+.base-timer__label {
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+.base-timer__path-remaining {
+  stroke-width: 9px;
+  stroke-linecap: round;
+  transform: rotate(90deg);
+  transform-origin: center;
+  transition: 0.1s linear all;
+  stroke: hsla(153, 48%, 49%, 0.7);
+}
+.base-timer__svg {
+  transform: scaleX(-1);
 }
 
 p {
