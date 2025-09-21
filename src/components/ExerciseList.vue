@@ -687,26 +687,22 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-@mixin smallh1 {
-  margin: 0px 0px 0.4em 0px;
-  font-size: 1em;
-}
-
+<style scoped>
 .spacer {
   height: 0.8em;
 }
 
 .workout-summary {
   width: 70%;
-  // margin: 0 auto;
+  /* margin: 0 auto; */
   text-align: center;
   padding: 8px;
   border: 2px dotted hsla(var(--dark-slate), 1);
-  h1 {
-    @include smallh1;
-    font-size: 1.4em;
-  }
+}
+
+.workout-summary h1 {
+  margin: 0px 0px 0.4em 0px;
+  font-size: 1.4em;
 }
 
 .stat-description {
@@ -723,9 +719,10 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   width: 80%;
-  label {
-    position: relative;
-  }
+}
+
+.flex-row label {
+  position: relative;
 }
 
 .workout-stat-box {
@@ -751,7 +748,7 @@ export default {
 }
 .set {
   height: 0.6em;
-  // width: 100%;
+  /* width: 100%; */
   transform: translateX(0px) translateY(0px) scale(1);
   opacity: 1;
   transition: all 0.8s ease;
@@ -785,9 +782,9 @@ export default {
 label {
   display: flex;
   flex-direction: column;
-  p {
-    margin: 0.2em;
-  }
+}
+label p {
+  margin: 0.2em;
 }
 .exercise-inputs {
   display: flex;
@@ -797,44 +794,37 @@ label {
   justify-content: space-around;
   align-items: center;
   height: max-content;
+}
 
-  label {
-    display: inherit;
-    align-items: inherit;
-  }
-  input {
-    border: none;
-    padding-left: 4px;
-    text-align: center;
-    height: 100%;
-    border-bottom: 3px solid white;
-    width: 60%;
-  }
-  input:focus {
-    border: none;
-    outline: none;
-    border-bottom: var(--input-border);
-  }
+.exercise-inputs label {
+  display: inherit;
+  align-items: inherit;
+}
+.exercise-inputs input {
+  border: none;
+  padding-left: 4px;
+  text-align: center;
+  height: 100%;
+  border-bottom: 3px solid white;
+  width: 60%;
+}
+.exercise-inputs input:focus {
+  border: none;
+  outline: none;
+  border-bottom: var(--input-border);
+}
 
-  input[type='number'] {
-    width: 2.2em;
-    -moz-appearance: textfield;
-    // &::-webkit-inner-spin-button {
-    //   -webkit-appearance: none;
-    // }
-    // &::-webkit-outer-spin-button {
-    //   -webkit-appearance: none;
-    //   margin: 0;
-    // }
-  }
+.exercise-inputs input[type='number'] {
+  width: 2.2em;
+  -moz-appearance: textfield;
+}
 
-  input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-  }
-  input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+.exercise-inputs input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+.exercise-inputs input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .complete {
@@ -850,13 +840,13 @@ label {
   border-left: hsla(var(--green), var(--border-shade));
   border-right: hsla(var(--green), var(--border-shade));
   border-top: hsla(var(--green), var(--border-shade));
+}
 
-  &:nth-of-type(1n) {
-    border-radius: 3px 0px 0px 3px;
-  }
-  &:nth-of-type(2n) {
-    border-radius: 0px 3px 3px 0px;
-  }
+.exercise-inputs button:nth-of-type(1n) {
+  border-radius: 3px 0px 0px 3px;
+}
+.exercise-inputs button:nth-of-type(2n) {
+  border-radius: 0px 3px 3px 0px;
 }
 
 .editing-view {
@@ -872,75 +862,76 @@ label {
   grid-template-columns: 1fr 1fr;
   height: 80vh;
   width: 99vw;
-  .timer-ui-control {
-    h1 {
-      @include smallh1;
-      color: white;
-    }
-    display: flex;
-    background-color: var(--slate-bg);
-    flex-wrap: wrap;
-    justify-content: space-around;
-    flex-direction: row;
-    width: 4em;
-    position: absolute;
-    right: 0;
+}
+.workout-grid .timer-ui-control {
+  display: flex;
+  background-color: var(--slate-bg);
+  flex-wrap: wrap;
+  justify-content: space-around;
+  flex-direction: row;
+  width: 4em;
+  position: absolute;
+  right: 0;
 
-    align-items: center;
-    border: 3px solid hsla(var(--dark-slate), 1);
-    border-radius: 3px;
-    button {
-      display: flex;
-      justify-content: center;
-      border: none;
-      background-color: hsla(var(--dark-slate), 1);
-      margin: 0.2em;
-      border: 1px solid rgba(0, 0, 0, 0.4);
-      border-radius: 3px;
-      width: 28px;
-      height: 28px;
-      &:hover {
-        cursor: pointer;
-      }
-    }
-  }
+  align-items: center;
+  border: 3px solid hsla(var(--dark-slate), 1);
+  border-radius: 3px;
+}
+.workout-grid .timer-ui-control h1 {
+  margin: 0px 0px 0.4em 0px;
+  font-size: 1em;
+  color: white;
+}
+.workout-grid .timer-ui-control button {
+  display: flex;
+  justify-content: center;
+  border: none;
+  background-color: hsla(var(--dark-slate), 1);
+  margin: 0.2em;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  width: 28px;
+  height: 28px;
+}
+.workout-grid .timer-ui-control button:hover {
+  cursor: pointer;
 }
 li {
   display: grid;
   gap: 0.4em;
   grid-template-columns: 1em 5em 1em 1.2em;
-  // padding: 0em 0em 0.4em 0.4em;
+  /* padding: 0em 0em 0.4em 0.4em; */
   border-radius: 3px;
   width: 95%;
-  // margin: 0 auto;
+  /* margin: 0 auto; */
   flex-direction: row;
   justify-content: space-evenly;
   height: fit-content;
   margin-bottom: 0.6em;
   align-items: center;
   border: 1px dotted var(--workout-green);
-  p:last-of-type {
-    font-size: 0.8em;
-    margin-bottom: 0;
-    padding-left: 1em;
-    place-self: last baseline;
-    justify-self: last baseline;
-    margin-block-end: none;
-  }
-  button:nth-of-type(1n) {
-    border: none;
-    width: 1.2em;
-    height: 1.2em;
-    display: grid;
-    place-self: flex-start;
-    place-content: center;
-    background: #222c;
-    color: white;
-    font-size: 1em;
-    font-weight: 700;
-    border-radius: 0 0 0px 3px;
-    cursor: pointer;
-  }
+}
+li p:last-of-type {
+  font-size: 0.8em;
+  margin-bottom: 0;
+  padding-left: 1em;
+  place-self: last baseline;
+  justify-self: last baseline;
+  margin-block-end: none;
+}
+li button:nth-of-type(1n) {
+  border: none;
+  width: 1.2em;
+  height: 1.2em;
+  display: grid;
+  place-self: flex-start;
+  place-content: center;
+  background: #222c;
+  color: white;
+  font-size: 1em;
+  font-weight: 700;
+  border-radius: 0 0 0px 3px;
+  cursor: pointer;
 }
 
 .grab {
@@ -968,13 +959,14 @@ li {
   padding: 0.4em;
   border-radius: 3px;
   height: 100%;
-  .set {
-    border: 1px solid white;
-    box-shadow: 1px 1px;
-  }
-  h1 {
-    @include smallh1;
-  }
+}
+.progress-area .set {
+  border: 1px solid white;
+  box-shadow: 1px 1px;
+}
+.progress-area h1 {
+  margin: 0px 0px 0.4em 0px;
+  font-size: 1em;
 }
 
 .exercise-pill {
@@ -1010,14 +1002,13 @@ ol {
   list-style-type: none;
 }
 ol:empty::before {
-  // content: 'Added exercises will appear here';
-  content: url('https://images.vexels.com/media/users/3/130284/isolated/lists/69735ff4cc4f39f2a323e99b7b532915-female-fitness-exercise-silhouette.png');
+  content: 'Added exercises will appear here';
   width: 30px;
   height: 30px;
   font-style: oblique;
 }
 ol:empty::after {
-  content: '\ Added exercises will appear here';
+  content: 'Added exercises will appear here';
   width: 30px;
   height: 30px;
   font-style: oblique;
@@ -1049,31 +1040,30 @@ nav {
 }
 .move-position-buttons {
   font-size: 0.8em;
-  button {
-    border: none;
-    background-color: hsla(var(--dark-slate), 1);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    &:first-of-type {
-      border-bottom: 2px solid var(--input-border);
-      // margin-bottom: -3px;
-      border-radius: 0px 2px 0px 0px;
-      border-left: 1px solid hsla(var(--green), var(--border-shade));
-    }
-    &:last-of-type {
-      margin-top: 0;
-      border-radius: 0px 0px 2px 0px;
-      border-top: 2px solid var(--input-border);
-      border-left: 1px solid hsla(var(--green), var(--border-shade));
-    }
-  }
+}
+.move-position-buttons button {
+  border: none;
+  background-color: hsla(var(--dark-slate), 1);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.move-position-buttons button:first-of-type {
+  border-bottom: 2px solid var(--input-border);
+  /* margin-bottom: -3px; */
+  border-radius: 0px 2px 0px 0px;
+  border-left: 1px solid hsla(var(--green), var(--border-shade));
+}
+.move-position-buttons button:last-of-type {
+  margin-top: 0;
+  border-radius: 0px 0px 2px 0px;
+  border-top: 2px solid var(--input-border);
+  border-left: 1px solid hsla(var(--green), var(--border-shade));
 }
 
 .neutral {
   border: 1px solid black;
 }
-
 .current-exercise {
   border: 2px solid var(--workout-green);
 }

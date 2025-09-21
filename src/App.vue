@@ -13,7 +13,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style>
+@import 'open-props/style';
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 body {
