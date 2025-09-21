@@ -1,5 +1,8 @@
 <template>
-  <ExerciseList />
+  <div>
+    <ExerciseList />
+    <p class="version">v{{ version }}</p>
+  </div>
 </template>
 
 <script>
@@ -9,6 +12,11 @@ export default {
   name: 'App',
   components: {
     ExerciseList,
+  },
+  data() {
+    return {
+      version: import.meta.env.VITE_APP_VERSION,
+    }
   },
 }
 </script>
@@ -27,6 +35,14 @@ body {
   text-align: center;
   color: #2c3e50;
   font-size: 1.2em;
+}
+
+.version {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 0.8em;
+  color: #aaa;
 }
 
 input {
