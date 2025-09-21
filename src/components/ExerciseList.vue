@@ -71,7 +71,7 @@ export default {
       currentExerciseX: '439px',
       currentExerciseY: '68px',
       editing: true,
-      setAmount: 0,
+      setAmount: 1,
       setsComplete: -1,
       updater: 0,
       restDuration: 3,
