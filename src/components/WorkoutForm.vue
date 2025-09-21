@@ -81,7 +81,11 @@
 export default {
   name: 'WorkoutForm',
   props: {
-    setAmount: Number,
+    setAmount: {
+      type:Number,
+      required: true,
+      default: 1
+    },
     restDuration: Number,
     bigBreakDuration: Number,
   },
@@ -197,6 +201,7 @@ label p {
 }
 .exercise-inputs input[type='number'] {
   width: 2.2em;
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 .exercise-inputs input::-webkit-inner-spin-button {

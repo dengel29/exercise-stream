@@ -1,14 +1,6 @@
 <template>
   <div class="editing-view styles">
     <div class="grid">
-      <EditableExerciseList
-        :exercises="exercises"
-        :set-amount="setAmount"
-        :set-indicator-styles="setIndicatorStyles"
-        @remove-exercise="removeExercise"
-        @move-up="moveup"
-        @move-down="movedown"
-      />
       <WorkoutForm
         :set-amount="setAmount"
         :rest-duration="restDuration"
@@ -17,6 +9,14 @@
         @update:restDuration="handleRestDuration"
         @update:bigBreakDuration="handleBigBreakDuration"
         @add-exercise="addExercise"
+      />
+      <EditableExerciseList
+        :exercises="exercises"
+        :set-amount="setAmount"
+        :set-indicator-styles="setIndicatorStyles"
+        @remove-exercise="removeExercise"
+        @move-up="moveup"
+        @move-down="movedown"
       />
       <WorkoutSummary
         :set-amount="setAmount"
@@ -50,6 +50,7 @@ export default {
     setAmount: {
       type: Number,
       required: true,
+      default: 1
     },
     restDuration: Number,
     bigBreakDuration: Number,
@@ -154,7 +155,7 @@ export default {
       var minutes = Math.floor(t / 60).toFixed(0)
       var seconds = (t - minutes * 60).toFixed(0)
 
-      return `${minutes} minutes \n\n ${seconds} seconds`
+      return `${minutes} m \n\n ${seconds} s`
     },
     handleSetAmount: function (value) {
       this.$emit('update:setAmount', value)
@@ -202,7 +203,7 @@ export default {
 
 .grid {
   display: grid;
-  grid-template-columns: 20em 20em 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
   gap: 1em;
 }
 </style>

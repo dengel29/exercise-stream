@@ -115,10 +115,16 @@ li button:nth-of-type(1n) {
 .exercise-list {
   margin: 0 auto;
   width: 50%;
+  padding: 1em;
+  background: whitesmoke;
+  border-radius: 5px;
+  border: 1px solid gainsboro
 }
 ol {
   padding: 0;
   list-style-type: none;
+  max-height:20em;
+  overflow: scroll;
 }
 ol:empty::before {
   content: 'Added exercises will appear here';

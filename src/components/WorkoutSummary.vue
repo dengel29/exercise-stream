@@ -72,7 +72,7 @@ export default {
       var minutes = Math.floor(t / 60).toFixed(0)
       var seconds = (t - minutes * 60).toFixed(0)
 
-      return `${minutes} minutes \n\n ${seconds} seconds`
+      return `${minutes} m \n\n ${seconds} s`
     },
   },
 }
@@ -81,7 +81,7 @@ export default {
 <style scoped>
 .workout-summary {
   width: 70%;
-  /* margin: 0 auto; */
+  margin: 0 auto;
   text-align: center;
   padding: 8px;
   border: 2px dotted hsla(var(--dark-slate), 1);
