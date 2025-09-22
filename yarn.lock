@@ -1746,10 +1746,10 @@ wrappy@1:
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=
 
-xstate@^4.19.2:
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.19.2.tgz#58ef6fc71737c76750ec61c5ff8b000101895d8a"
-  integrity sha512-eWI6kOHavcqhu1ACCmRowYGaQnH0KGvBoGg3lqmle9ZYyVWa2ZcVTgZlsK7o419/jw9gWX2LYmYGkm9w/VoXMA==
+xstate@^5.22.0:
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.22.0.tgz#9756b1067954938bf2fa09fe2d1bb9af2e4a0fca"
+  integrity sha512-5d73WWQaAozOaHl/la5TuriybLab9DNkzzYEte5UG2YwsVCR7SSDZJkyS6qfaOYGCFOjZjjSwEEVro4iqN3Slw==
 
 yallist@^3.0.2:
   version "3.1.1"

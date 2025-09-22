@@ -16,7 +16,7 @@
     "gsap": "^3.7.0",
     "open-props": "^1.7.16",
     "vue": "^3.2.25",
-    "xstate": "^4.19.2"
+    "xstate": "^5.22.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",

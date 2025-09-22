@@ -1,17 +1,17 @@
 <template>
   <div>
-    <ExerciseList />
+    <Main />
     <p class="version">v{{ version }}</p>
   </div>
 </template>
 
 <script>
-import ExerciseList from './components/ExerciseList.vue'
+import Main from './components/Main.vue'
 
 export default {
   name: 'App',
   components: {
-    ExerciseList,
+    Main,
   },
   data() {
     return {
