@@ -5,20 +5,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import Main from './components/Main.vue'
 
-export default {
-  name: 'App',
-  components: {
-    Main,
-  },
-  data() {
-    return {
-      version: import.meta.env.VITE_APP_VERSION,
-    }
-  },
-}
+const version = import.meta.env.VITE_APP_VERSION
 </script>
 
 <style>

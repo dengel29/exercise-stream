@@ -24,77 +24,102 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { useMachine } from '@xstate/vue'
+import { watch, computed } from 'vue'
 import timerMachine from '../machines/timer'
 import audioFile from '../assets/321.wav'
+
+const props = defineProps(['duration', 'startImmediately'])
+const emit = defineEmits(['exerciseComplete'])
+
 let audio = new Audio(audioFile)
-export default {
-  props: ['duration', 'startImmediately'],
-  emits: ['exerciseComplete'],
-  setup(props) {
-    const { state, send } = useMachine(timerMachine, {
-      context: {
-        duration: props.duration,
-        startImmediately: props.startImmediately,
-      },
-    })
-    return {
-      state,
-      send,
+
+const { snapshot, send } = useMachine(timerMachine, {
+  context: {
+    duration: props.duration,
+    startImmediately: props.startImmediately,
+  },
+})
+
+watch(
+  () => props.startImmediately,
+  (shouldStart) => {
+    if (shouldStart) {
+      send({ type: 'RESUME' })
+    } else {
+      send({ type: 'PAUSE' })
     }
-  },
-  computed: {
-    timeLeft() {
-      return (this.state.context.duration - this.state.context.elapsed).toFixed(1)
-    },
-    complete() {
-      return this.state.context.elapsed >= this.state.context.duration
-    },
-    paused() {
-      return this.state.matches('paused')
-    },
-    idle() {
-      return this.state.matches('idle')
-    },
-    running() {
-      return this.state.matches('running')
-    },
-    timeFraction() {
-      const rawTimeFraction = this.timeLeft / this.state.context.duration
-      const adjustment = (0.5 / this.state.context.duration) * (0.5 - rawTimeFraction)
-      return rawTimeFraction - adjustment
-    },
-    timeCircleDashArray() {
-      return `${(this.timeFraction * 282).toFixed(0)} 282`
-    },
-  },
-  watch: {
-    complete: {
-      handler() {
-        this.$emit('exerciseComplete')
-      },
-    },
-    timeLeft: {
-      handler(value) {
-        if (value == 4) {
-          audio.play()
-        }
-      },
-    },
-  },
-  methods: {
-    toggleTimer: function () {
-      if (this.paused || this.idle) {
-        this.send('RESUME')
-        return
-      }
-      if (this.running) {
-        this.send('PAUSE')
-        return
-      }
-    },
-  },
+  }
+)
+
+const timeLeft = computed(() => {
+  if (snapshot.value) {
+    return (snapshot.value.context.duration - snapshot.value.context.elapsed).toFixed(1)
+  }
+  return 0
+})
+
+const complete = computed(() => {
+  if (snapshot.value) {
+    return snapshot.value.context.elapsed >= snapshot.value.context.duration
+  }
+  return false
+})
+
+const paused = computed(() => {
+  if (snapshot.value) {
+    return snapshot.value.matches('paused')
+  }
+  return false
+})
+
+const idle = computed(() => {
+  if (snapshot.value) {
+    return snapshot.value.matches('idle')
+  }
+  return false
+})
+
+const running = computed(() => {
+  if (snapshot.value) {
+    return snapshot.value.matches('running')
+  }
+  return false
+})
+
+const timeFraction = computed(() => {
+  if (timeLeft.value && snapshot.value) {
+    const rawTimeFraction = timeLeft.value / snapshot.value.context.duration
+    const adjustment = (0.5 / snapshot.value.context.duration) * (0.5 - rawTimeFraction)
+    return rawTimeFraction - adjustment
+  }
+  return 0
+})
+
+const timeCircleDashArray = computed(() => {
+  return `${(timeFraction.value * 282).toFixed(0)} 282`
+})
+
+watch(complete, () => {
+  emit('exerciseComplete')
+})
+
+watch(timeLeft, (value) => {
+  if (value == 4) {
+    audio.play()
+  }
+})
+
+const toggleTimer = () => {
+  if (paused.value || idle.value) {
+    send({ type: 'RESUME' })
+    return
+  }
+  if (running.value) {
+    send({ type: 'PAUSE' })
+    return
+  }
 }
 </script>
 

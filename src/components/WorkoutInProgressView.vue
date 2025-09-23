@@ -51,7 +51,7 @@
       <div v-if="!currentExercise">WORKOUT COMPLETE</div>
       <div
         v-if="currentExercise"
-        ref="currentExercise"
+        ref="currentExerciseRef"
         :style="timerPosition"
         class="current-workout"
         :class="dragging ? grabbing : 'grab'"
@@ -75,7 +75,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import Timer from './Timer.vue'
 import timerLeftSVG from '@/assets/timerLeft.svg'
 import timerRightSVG from '@/assets/timerRight.svg'
@@ -83,124 +84,109 @@ import timerBottomSVG from '@/assets/timerBottom.svg'
 import timerTopSVG from '@/assets/timerTop.svg'
 import timerNoTextSVG from '@/assets/timerNoText.svg'
 
-export default {
-  name: 'WorkoutInProgressView',
-  components: {
-    Timer,
-  },
-  props: {
-    exercises: Array,
-    setAmount: Number,
-    setsComplete: Number,
-    currentExercise: Object,
-    updater: Number,
-    shouldStartImmediately: Boolean,
-    dragging: Boolean,
-  },
-  emits: ['exercise-complete', 'update-timer-position'],
-  setup() {
-    return {
-      timerLeftSVG,
-      timerRightSVG,
-      timerBottomSVG,
-      timerTopSVG,
-      timerNoTextSVG,
-    }
-  },
-  data: function () {
-    return {
-      currentExerciseX: '439px',
-      currentExerciseY: '68px',
-      currentWorkoutDisplayDirection: 'column',
-      currentWorkoutDisplayReverse: '',
-      currentWorkoutDisplayText: 'block',
-      grabbing: 'grabbing',
-    }
-  },
-  computed: {
-    setsLeft() {
-      return this.setAmount - this.setsComplete
-    },
-    setIndicatorStyles() {
-      return {
-        '--grid-width': `repeat(${this.setAmount}, minmax(0, ${(this.setAmount * 0.8).toFixed(
-          1
-        )}fr))`,
-        '--gap': `${100 / this.setAmount}px`,
-        '--total': `${this.setAmount}`,
-      }
-    },
-    timerPosition() {
-      return {
-        '--timer-x': `${this.currentExerciseX}`,
-        '--timer-y': `${this.currentExerciseY}`,
-        '--direction': `${this.currentWorkoutDisplayDirection}${this.currentWorkoutDisplayReverse}`,
-      }
-    },
-    textDisplay() {
-      return {
-        '--display': `${this.currentWorkoutDisplayText}`,
-      }
-    },
-  },
-  methods: {
-    exerciseComplete: function () {
-      this.$emit('exercise-complete')
-    },
-    noText: function () {
-      this.currentWorkoutDisplayText = 'none'
-    },
-    timerTop: function () {
-      this.currentWorkoutDisplayDirection = 'column'
-      this.currentWorkoutDisplayReverse = ''
-      this.currentWorkoutDisplayText = 'block'
-    },
-    timerBottom: function () {
-      this.currentWorkoutDisplayDirection = 'column'
-      this.currentWorkoutDisplayReverse = '-reverse'
-      this.currentWorkoutDisplayText = 'block'
-    },
-    timerRight: function () {
-      this.currentWorkoutDisplayDirection = 'row'
-      this.currentWorkoutDisplayReverse = '-reverse'
-      this.currentWorkoutDisplayText = 'block'
-    },
-    timerLeft: function () {
-      this.currentWorkoutDisplayDirection = 'row'
-      this.currentWorkoutDisplayReverse = ''
-      this.currentWorkoutDisplayText = 'block'
-    },
-    addGrabClass: function () {
-      this.$refs.currentExercise.classList.add('grab')
-    },
-    removeGrabClass: function () {
-      this.$refs.currentExercise.classList.remove('grab')
-    },
-    dragStart: function (event) {
-      this.$emit('update:dragging', true)
-      var style = window.getComputedStyle(event.target, null)
-      event.dataTransfer.setData(
-        'text/plain',
-        parseInt(style.getPropertyValue('left'), 10) -
-          event.clientX +
-          ',' +
-          (parseInt(style.getPropertyValue('top'), 10) - event.clientY)
-      )
-    },
-    dragOver: function (event) {
-      event.preventDefault()
-      return false
-    },
-    drop: function (event) {
-      this.$emit('update:dragging', false)
-      var offset = event.dataTransfer.getData('text/plain').split(',')
-      this.currentExerciseX = event.clientX + parseInt(offset[0], 10) + 'px'
-      this.currentExerciseY = event.clientY + parseInt(offset[1], 10) + 'px'
-      this.$emit('update-timer-position', { x: this.currentExerciseX, y: this.currentExerciseY })
-      event.preventDefault()
-      return false
-    },
-  },
+const props = defineProps({
+  exercises: Array,
+  setAmount: Number,
+  setsComplete: Number,
+  currentExercise: Object,
+  updater: Number,
+  shouldStartImmediately: Boolean,
+  dragging: Boolean,
+})
+
+const emit = defineEmits(['exercise-complete', 'update-timer-position', 'update:dragging'])
+
+const currentExerciseX = ref('439px')
+const currentExerciseY = ref('68px')
+const currentWorkoutDisplayDirection = ref('column')
+const currentWorkoutDisplayReverse = ref('')
+const currentWorkoutDisplayText = ref('block')
+const grabbing = 'grabbing'
+const currentExerciseRef = ref(null)
+
+const setsLeft = computed(() => props.setAmount - props.setsComplete)
+
+const setIndicatorStyles = computed(() => ({
+  '--grid-width': `repeat(${props.setAmount}, minmax(0, ${(props.setAmount * 0.8).toFixed(1)}fr))`,
+  '--gap': `${100 / props.setAmount}px`,
+  '--total': `${props.setAmount}`,
+}))
+
+const timerPosition = computed(() => ({
+  '--timer-x': currentExerciseX.value,
+  '--timer-y': currentExerciseY.value,
+  '--direction': `${currentWorkoutDisplayDirection.value}${currentWorkoutDisplayReverse.value}`,
+}))
+
+const textDisplay = computed(() => ({
+  '--display': currentWorkoutDisplayText.value,
+}))
+
+const exerciseComplete = () => {
+  emit('exercise-complete')
+}
+
+const noText = () => {
+  currentWorkoutDisplayText.value = 'none'
+}
+
+const timerTop = () => {
+  currentWorkoutDisplayDirection.value = 'column'
+  currentWorkoutDisplayReverse.value = ''
+  currentWorkoutDisplayText.value = 'block'
+}
+
+const timerBottom = () => {
+  currentWorkoutDisplayDirection.value = 'column'
+  currentWorkoutDisplayReverse.value = '-reverse'
+  currentWorkoutDisplayText.value = 'block'
+}
+
+const timerRight = () => {
+  currentWorkoutDisplayDirection.value = 'row'
+  currentWorkoutDisplayReverse.value = '-reverse'
+  currentWorkoutDisplayText.value = 'block'
+}
+
+const timerLeft = () => {
+  currentWorkoutDisplayDirection.value = 'row'
+  currentWorkoutDisplayReverse.value = ''
+  currentWorkoutDisplayText.value = 'block'
+}
+
+const addGrabClass = () => {
+  currentExerciseRef.value.classList.add('grab')
+}
+
+const removeGrabClass = () => {
+  currentExerciseRef.value.classList.remove('grab')
+}
+
+const dragStart = (event) => {
+  emit('update:dragging', true)
+  var style = window.getComputedStyle(event.target, null)
+  event.dataTransfer.setData(
+    'text/plain',
+    parseInt(style.getPropertyValue('left'), 10) -
+      event.clientX +
+      ',' +
+      (parseInt(style.getPropertyValue('top'), 10) - event.clientY)
+  )
+}
+
+const dragOver = (event) => {
+  event.preventDefault()
+  return false
+}
+
+const drop = (event) => {
+  emit('update:dragging', false)
+  var offset = event.dataTransfer.getData('text/plain').split(',')
+  currentExerciseX.value = event.clientX + parseInt(offset[0], 10) + 'px'
+  currentExerciseY.value = event.clientY + parseInt(offset[1], 10) + 'px'
+  emit('update-timer-position', { x: currentExerciseX.value, y: currentExerciseY.value })
+  event.preventDefault()
+  return false
 }
 </script>
 

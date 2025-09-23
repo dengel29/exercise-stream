@@ -39,221 +39,180 @@
   </div>
 </template>
 
-<script>
-import Timer from './Timer.vue'
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import WorkoutEditingView from './WorkoutEditingView.vue'
 import WorkoutInProgressView from './WorkoutInProgressView.vue'
-import timerLeftSVG from '@/assets/timerLeft.svg'
-import timerRightSVG from '@/assets/timerRight.svg'
-import timerBottomSVG from '@/assets/timerBottom.svg'
-import timerTopSVG from '@/assets/timerTop.svg'
-import timerNoTextSVG from '@/assets/timerNoText.svg'
 
-export default {
-  components: {
-    Timer,
-    WorkoutEditingView,
-    WorkoutInProgressView,
-  },
-  setup() {
-    return {
-      timerLeftSVG,
-      timerRightSVG,
-      timerBottomSVG,
-      timerTopSVG,
-      timerNoTextSVG,
+const exercises = ref([])
+const dragging = ref(false)
+const currentExerciseX = ref('439px')
+const currentExerciseY = ref('68px')
+const editing = ref(true)
+const setAmount = ref(1)
+const setsComplete = ref(-1)
+const updater = ref(0)
+const restDuration = ref(3)
+const bigBreakDuration = ref(10)
+const status = ref('idle')
+
+const buttonText = computed(() => (editing.value ? 'Start Workout' : 'Edit Workout'))
+
+const anyExercisesComplete = computed(() => exercises.value.some((ex) => ex.complete))
+
+const shouldStartImmediately = computed(
+  () => anyExercisesComplete.value || setsComplete.value >= 0
+)
+
+const resting = computed(() => status.value === 'resting')
+
+const currentExercise = computed(() => {
+  if (resting.value && exercises.value.every((e) => !e.complete)) {
+    return { name: 'Big Break', duration: bigBreakDuration.value, complete: false }
+  } else if (resting.value) {
+    return { name: 'Resting', duration: restDuration.value, complete: false }
+  } else {
+    return exercises.value.filter((e) => !e.complete)[0]
+  }
+})
+
+const setsLeft = computed(() => setAmount.value - setsComplete.value)
+
+watch(setAmount, (value) => {
+  setURLParams('setAmount', value)
+})
+
+watch(restDuration, (value) => {
+  setURLParams('restDuration', value)
+})
+
+watch(bigBreakDuration, (value) => {
+  setURLParams('bigBreakDuration', value)
+})
+
+watch(currentExercise, () => {
+  updater.value++
+})
+
+onMounted(() => {
+  let url = new URL(document.location)
+  if (url.searchParams.has('x') && url.searchParams.has('y')) {
+    currentExerciseX.value = url.searchParams.get('x')
+    currentExerciseY.value = url.searchParams.get('y')
+  }
+  if (url.searchParams.has('exercises')) {
+    exercises.value = JSON.parse(decodeURIComponent(url.searchParams.get('exercises')))
+  }
+  if (url.searchParams.has('setAmount')) {
+    setAmount.value = Number(url.searchParams.get('setAmount'))
+  }
+  if (url.searchParams.has('restDuration')) {
+    restDuration.value = Number(url.searchParams.get('restDuration'))
+  }
+  if (url.searchParams.has('bigBreakDuration')) {
+    bigBreakDuration.value = Number(url.searchParams.get('bigBreakDuration'))
+  }
+})
+
+const setURLParams = (param, value) => {
+  const url = new URL(document.location)
+  if (typeof value === 'string' || typeof value === 'number') {
+    url.searchParams.set(param, value)
+  }
+  if (typeof value === 'object') {
+    url.searchParams.set(param, encodeURIComponent(JSON.stringify(value)))
+  }
+  window.history.pushState({}, '', url)
+}
+
+const updateTimerPosition = (position) => {
+  currentExerciseX.value = position.x
+  currentExerciseY.value = position.y
+  setURLParams('x', currentExerciseX.value)
+  setURLParams('y', currentExerciseY.value)
+}
+
+const resetWorkouts = () => {
+  exercises.value.forEach((ex) => {
+    ex.complete = false
+    ex.timeLeft = ex.duration
+  })
+}
+
+const endSet = () => {
+  if (setsComplete.value === -1) {
+    setsComplete.value = 1
+  } else {
+    setsComplete.value++
+    if (setsLeft.value === 0) {
+      return
     }
-  },
-  data: function () {
-    return {
-      exercises: [],
-      dragging: false,
-      currentExerciseX: '439px',
-      currentExerciseY: '68px',
-      editing: true,
-      setAmount: 1,
-      setsComplete: -1,
-      updater: 0,
-      restDuration: 3,
-      bigBreakDuration: 10,
-      status: 'idle',
-      channel: null,
+  }
+  resetWorkouts()
+}
+
+const setCheck = () => {
+  if (exercises.value.every((exercise) => exercise.complete)) {
+    endSet()
+  }
+}
+
+const exerciseComplete = () => {
+  if (!resting.value) {
+    const current = currentExercise.value
+    const exerciseInArray = exercises.value.find((e) => e.name === current.name)
+    if (exerciseInArray) {
+      exerciseInArray.complete = true
     }
-  },
-  computed: {
-    buttonText() {
-      return this.editing ? 'Start Workout' : 'Edit Workout'
-    },
-    shouldStartImmediately() {
-      return this.anyExercisesComplete || this.setsComplete >= 0
-    },
-    currentExercise() {
-      // returns a 'resting' view with rest duration if resting, or the next incomplete workout in the set
-      if (this.resting && this.exercises.every((e) => !e.complete)) {
-        return { name: 'Big Break', duration: this.bigBreakDuration, complete: false }
-      } else if (this.resting) {
-        return { name: 'Resting', duration: this.restDuration, complete: false }
-      } else {
-        return this.exercises.filter((e) => !e.complete)[0]
-      }
-    },
-    anyExercisesComplete() {
-      return this.exercises.some((ex) => ex.complete)
-    },
-    setsLeft() {
-      return this.setAmount - this.setsComplete
-    },
-    workingOut() {
-      return this.status === 'workingOut'
-    },
-    resting() {
-      return this.status === 'resting'
-    },
-  },
-  watch: {
-    setAmount: {
-      handler(value) {
-        this.setURLParams('setAmount', value)
-      },
-    },
-    restDuration: {
-      handler(value) {
-        this.setURLParams('restDuration', value)
-      },
-    },
-    bigBreakDuration: {
-      handler(value) {
-        this.setURLParams('bigBreakDuration', value)
-      },
-    },
-    currentExercise: {
-      handler() {
-        // when current workout changes, increment this updater to re-render the timer
-        this.updater++
-      },
-    },
-  },
-  mounted: function () {
-    // url param detection and updating data from URL params
-    let url = new URL(document.location)
-    if (url.searchParams.has('x') && url.searchParams.has('y')) {
-      this.currentExerciseX = url.searchParams.get('x')
-      this.currentExerciseY = url.searchParams.get('y')
-    }
-    if (url.searchParams.has('exercises')) {
-      this.exercises = JSON.parse(decodeURIComponent(url.searchParams.get('exercises')))
-    }
-    if (url.searchParams.has('setAmount')) {
-      this.setAmount = Number(url.searchParams.get('setAmount'))
-    }
-    if (url.searchParams.has('restDuration')) {
-      this.restDuration = Number(url.searchParams.get('restDuration'))
-    }
-    if (url.searchParams.has('bigBreakDuration')) {
-      this.bigBreakDuration = Number(url.searchParams.get('bigBreakDuration'))
-    }
-  },
-  methods: {
-    updateTimerPosition: function (position) {
-      this.currentExerciseX = position.x
-      this.currentExerciseY = position.y
-      this.setURLParams('x', this.currentExerciseX)
-      this.setURLParams('y', this.currentExerciseY)
-    },
-    setURLParams: function (param, value) {
-      const url = new URL(document.location)
-      if (typeof value === 'string' || typeof value === 'number') {
-        url.searchParams.set(param, value)
-      }
-      if (typeof value === 'object') {
-        url.searchParams.set(param, encodeURIComponent(JSON.stringify(value)))
-      }
-      window.history.pushState({}, '', url)
-    },
-    generateURLParams: function () {
-      this.channel.postMessage(JSON.parse(JSON.stringify(this.exercises)))
-      this.setURLParams('exercises', this.exercises)
-    },
-    exerciseComplete: function () {
-      // rests are exercises also, so checks if just completed 'resting' workout or normal workout
-      if (!this.resting) {
-        this.currentExercise.complete = true
-        this.status = 'resting'
-        this.setCheck()
-      } else {
-        this.status = 'workingOut'
-      }
-    },
-    setCheck: function () {
-      // end the set if all workouts are complete
-      if (this.exercises.every((exercise) => exercise.complete)) {
-        this.endSet()
-      }
-    },
-    endSet() {
-      // first set
-      if (this.setsComplete === -1) {
-        this.setsComplete = 1
-        // every set after first
-      } else {
-        this.setsComplete++
-        // last set
-        if (this.setsLeft === 0) {
-          return
-          // any set besides last
-        }
-      }
-      this.resetWorkouts()
-    },
-    resetWorkouts() {
-      this.exercises.forEach((ex) => {
-        ex.complete = false
-        ex.timeLeft = ex.duration
-      })
-    },
-    resetSetAndWorkouts() {
-      this.setsComplete = -1
-      this.resetWorkouts()
-    },
-    toggleWorkout: function () {
-      this.editing = !this.editing
-    },
-    addExercise: function (exercise) {
-      this.exercises.push({
-        name: exercise.name,
-        duration: exercise.duration,
-        timeLeft: exercise.duration,
-        complete: false,
-      })
-      this.setURLParams('exercises', this.exercises)
-    },
-    removeExercise: function (index) {
-      this.exercises.splice(index, 1)
-      this.setURLParams('exercises', this.exercises)
-    },
-    moveup: function (index) {
-      if (index > 0) {
-        let selectedElement = this.exercises[index]
-        let elementAbove = this.exercises[index - 1]
-        // move element above down
-        this.exercises.splice(index, 1, elementAbove)
-        // move element one position higher
-        this.exercises.splice(index - 1, 1, selectedElement)
-      }
-      this.setURLParams('exercises', this.exercises)
-    },
-    movedown: function (index) {
-      if (index < this.exercises.length - 1) {
-        let selectedElement = this.exercises[index]
-        let elementAbove = this.exercises[index + 1]
-        // move element above down
-        this.exercises.splice(index, 1, elementAbove)
-        // move element one position higher
-        this.exercises.splice(index + 1, 1, selectedElement)
-      }
-      this.setURLParams('exercises', this.exercises)
-    },
-  },
+    status.value = 'resting'
+    setCheck()
+  } else {
+    status.value = 'workingOut'
+  }
+}
+
+const resetSetAndWorkouts = () => {
+  setsComplete.value = -1
+  resetWorkouts()
+}
+
+const toggleWorkout = () => {
+  editing.value = !editing.value
+}
+
+const addExercise = (exercise) => {
+  exercises.value.push({
+    name: exercise.name,
+    duration: exercise.duration,
+    timeLeft: exercise.duration,
+    complete: false,
+  })
+  setURLParams('exercises', exercises.value)
+}
+
+const removeExercise = (index) => {
+  exercises.value.splice(index, 1)
+  setURLParams('exercises', exercises.value)
+}
+
+const moveup = (index) => {
+  if (index > 0) {
+    let selectedElement = exercises.value[index]
+    let elementAbove = exercises.value[index - 1]
+    exercises.value.splice(index, 1, elementAbove)
+    exercises.value.splice(index - 1, 1, selectedElement)
+  }
+  setURLParams('exercises', exercises.value)
+}
+
+const movedown = (index) => {
+  if (index < exercises.value.length - 1) {
+    let selectedElement = exercises.value[index]
+    let elementAbove = exercises.value[index + 1]
+    exercises.value.splice(index, 1, elementAbove)
+    exercises.value.splice(index + 1, 1, selectedElement)
+  }
+  setURLParams('exercises', exercises.value)
 }
 </script>
 

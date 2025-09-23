@@ -77,70 +77,76 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'WorkoutForm',
-  props: {
-    setAmount: {
-      type:Number,
-      required: true,
-      default: 1
-    },
-    restDuration: Number,
-    bigBreakDuration: Number,
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
+  setAmount: {
+    type: Number,
+    required: true,
+    default: 1,
   },
-  emits: ['update:setAmount', 'update:restDuration', 'update:bigBreakDuration', 'add-exercise'],
-  methods: {
-    decrementSetAmount: function () {
-      if (this.setAmount - 1 === 0) {
-        alert('Must have at least 1 set')
-        this.$emit('update:setAmount', 1)
-        return
-      }
-      this.$emit('update:setAmount', this.setAmount - 1)
-    },
-    incrementSetAmount: function () {
-      if (this.setAmount + 1 < 40) {
-        this.$emit('update:setAmount', this.setAmount + 1)
-      } else {
-        return alert('cant do that')
-      }
-    },
-    handleSetAmount: function (event) {
-      this.$emit('update:setAmount', parseFloat(event.target.value))
-    },
-    decrementRestDuration: function () {
-      this.$emit('update:restDuration', this.restDuration - 1)
-    },
-    incrementRestDuration: function () {
-      this.$emit('update:restDuration', this.restDuration + 1)
-    },
-    handleRestDuration: function (event) {
-      this.$emit('update:restDuration', parseFloat(event.target.value))
-    },
-    decrementBigBreakDuration: function () {
-      this.$emit('update:bigBreakDuration', this.bigBreakDuration - 1)
-    },
-    incrementBigBreakDuration: function () {
-      this.$emit('update:bigBreakDuration', this.bigBreakDuration + 1)
-    },
-    handleBigBreakDuration: function (event) {
-      this.$emit('update:bigBreakDuration', parseFloat(event.target.value))
-    },
-    decrementExerciseDuration: function () {
-      this.$refs.exerciseduration.value--
-    },
-    incrementExerciseDuration: function () {
-      this.$refs.exerciseduration.value++
-    },
-    addExercise: function () {
-      let name = this.$refs.exercisename.value
-      let duration = Number(this.$refs.exerciseduration.value)
-      this.$emit('add-exercise', { name, duration })
-      this.$refs.exercisename.value = ''
-      this.$refs.exercisename.focus()
-    },
-  },
+  restDuration: Number,
+  bigBreakDuration: Number,
+})
+
+const emit = defineEmits([
+  'update:setAmount',
+  'update:restDuration',
+  'update:bigBreakDuration',
+  'add-exercise',
+])
+
+const exercisename = ref(null)
+const exerciseduration = ref(null)
+
+const decrementSetAmount = () => {
+  if (props.setAmount - 1 === 0) {
+    alert('Must have at least 1 set')
+    emit('update:setAmount', 1)
+    return
+  }
+  emit('update:setAmount', props.setAmount - 1)
+}
+
+const incrementSetAmount = () => {
+  if (props.setAmount + 1 < 40) {
+    emit('update:setAmount', props.setAmount + 1)
+  } else {
+    alert('cant do that')
+  }
+}
+
+const decrementRestDuration = () => {
+  emit('update:restDuration', props.restDuration - 1)
+}
+
+const incrementRestDuration = () => {
+  emit('update:restDuration', props.restDuration + 1)
+}
+
+const decrementBigBreakDuration = () => {
+  emit('update:bigBreakDuration', props.bigBreakDuration - 1)
+}
+
+const incrementBigBreakDuration = () => {
+  emit('update:bigBreakDuration', props.bigBreakDuration + 1)
+}
+
+const decrementExerciseDuration = () => {
+  exerciseduration.value.value--
+}
+
+const incrementExerciseDuration = () => {
+  exerciseduration.value.value++
+}
+
+const addExercise = () => {
+  let name = exercisename.value.value
+  let duration = Number(exerciseduration.value.value)
+  emit('add-exercise', { name, duration })
+  exercisename.value.value = ''
+  exercisename.value.focus()
 }
 </script>
 

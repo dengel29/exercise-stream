@@ -54,27 +54,23 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'WorkoutSummary',
-  props: {
-    exercises: Array,
-    setAmount: Number,
-    restDuration: Number,
-    bigBreakDuration: Number,
-    animatedSetAmount: Number,
-    animatedTotalTime: Number,
-    animatedActiveTime: Number,
-    animatedRestingTime: Number,
-  },
-  methods: {
-    convertSecondsToMinutesAndSeconds(t) {
-      var minutes = Math.floor(t / 60).toFixed(0)
-      var seconds = (t - minutes * 60).toFixed(0)
+<script setup>
+const props = defineProps({
+  exercises: Array,
+  setAmount: Number,
+  restDuration: Number,
+  bigBreakDuration: Number,
+  animatedSetAmount: Number,
+  animatedTotalTime: Number,
+  animatedActiveTime: Number,
+  animatedRestingTime: Number,
+})
 
-      return `${minutes} m \n\n ${seconds} s`
-    },
-  },
+const convertSecondsToMinutesAndSeconds = (t) => {
+  var minutes = Math.floor(t / 60).toFixed(0)
+  var seconds = (t - minutes * 60).toFixed(0)
+
+  return `${minutes} m \n\n ${seconds} s`
 }
 </script>
 

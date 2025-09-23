@@ -567,10 +567,10 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.5.21.tgz#505edb122629d1979f70a2a65ca0bd4050dc2e54"
   integrity sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==
 
-"@xstate/vue@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@xstate/vue/-/vue-0.5.0.tgz#e1267d7c08cefc443528022e54a8c8ebb09e0254"
-  integrity sha512-xIb7J6piFlxkKunFgGZVbIcCv3Tc/UtQEMD0705zRYuDRyb0woz3MsAweagfsqosIiNlfwA/OStcB4Z6NrcDfg==
+"@xstate/vue@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@xstate/vue/-/vue-5.0.0.tgz#fec8c366cd19312caa19fbc33782def5944d664d"
+  integrity sha512-9TyJV4yz5QLJdEU44Ly9LBooEyZmv0nht3qEvDflxXAJmSn1dzaZeESdHFm+ANHtxoUed5jGqH6NT86BusvXQg==
 
 acorn-jsx@^5.2.0:
   version "5.3.1"

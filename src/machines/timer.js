@@ -1,7 +1,7 @@
-import { createMachine, assign } from 'xstate'
+import { createMachine, assign, fromCallback } from 'xstate'
 
 const tick = assign({
-  elapsed: (context) => +(context.elapsed + context.interval),
+  elapsed: ({ context }) => +(context.elapsed + context.interval),
 })
 
 const timerMachine = createMachine({
@@ -22,22 +22,20 @@ const timerMachine = createMachine({
       },
       always: {
         target: 'running',
-        cond: (context) => {
-          return context.startImmediately
-        },
+        guard: ({ context }) => context.startImmediately,
       },
     },
     running: {
       invoke: {
-        src: (context) => (callback) => {
+        src: fromCallback(({ sendBack }) => {
           const interval = setInterval(() => {
-            callback('TICK')
-          }, 1000 * context.interval)
+            sendBack({ type: 'TICK' })
+          }, 1000 * 0.1)
 
           return () => {
             clearInterval(interval)
           }
-        },
+        }),
       },
       on: {
         TICK: {
@@ -49,9 +47,7 @@ const timerMachine = createMachine({
       },
       always: {
         target: 'paused',
-        cond: (context) => {
-          return context.elapsed > context.duration
-        },
+        guard: ({ context }) => context.elapsed >= context.duration,
       },
     },
     paused: {

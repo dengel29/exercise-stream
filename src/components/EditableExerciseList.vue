@@ -28,26 +28,25 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'EditableExerciseList',
-  props: {
-    exercises: Array,
-    setAmount: Number,
-    setIndicatorStyles: Object,
-  },
-  emits: ['remove-exercise', 'move-up', 'move-down'],
-  methods: {
-    removeExercise: function (index) {
-      this.$emit('remove-exercise', index)
-    },
-    moveup: function (index) {
-      this.$emit('move-up', index)
-    },
-    movedown: function (index) {
-      this.$emit('move-down', index)
-    },
-  },
+<script setup>
+const props = defineProps({
+  exercises: Array,
+  setAmount: Number,
+  setIndicatorStyles: Object,
+})
+
+const emit = defineEmits(['remove-exercise', 'move-up', 'move-down'])
+
+const removeExercise = (index) => {
+  emit('remove-exercise', index)
+}
+
+const moveup = (index) => {
+  emit('move-up', index)
+}
+
+const movedown = (index) => {
+  emit('move-down', index)
 }
 </script>
 
